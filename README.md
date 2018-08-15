@@ -18,4 +18,4 @@ The purpose of this repos is to give you an idea about k8s and k8s aspects
 
 * Credits :
 
-I must give credit to kamran Ahmed [blog](http://kamranahmed.info) for the methodology used to present this map that way!
+I must give credit to kamran Ahmed for the methodology used to present this map that way!
