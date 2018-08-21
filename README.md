@@ -11,7 +11,3 @@ The purpose of this repos is to give you an idea about k8s and k8s aspects
 - [ ] Setup deployments in K8S using jinja templates
 - [ ] Build K8S Cluster using Terraform
 - [ ] Setup Montoring for K8S
-
-* Credits :
-
-I must give credit to kamran Ahmed for the methodology used to present this map that way!
