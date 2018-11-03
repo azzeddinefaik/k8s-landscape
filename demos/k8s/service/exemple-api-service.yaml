@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: exemple-api-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 7001
+    name: http
+  selector:
+    component: exemple-api-deployment

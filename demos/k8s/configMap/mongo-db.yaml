@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exemple-config-mongodb
+  namespace: mongodb
+  labels:
+    app: exemple-mongodb
+data:
+  mongod.conf: |
+    net:
+      port: 27017
+    replication:
+      replSetName: usersMongoDb
+    storage:
+      dbPath: /data/db

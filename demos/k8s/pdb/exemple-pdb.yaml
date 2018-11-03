@@ -1,0 +1,9 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: exemple-api-service-pdb
+spec:
+  selector:
+    matchLabels:
+      component: exemple-api-deployment
+  maxUnavailable: 1

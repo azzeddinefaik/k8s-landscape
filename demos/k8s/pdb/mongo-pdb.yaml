@@ -1,0 +1,10 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: exemple-mongodb-pdb
+  namespace: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: exemple-mongodb
+  maxUnavailable: 1

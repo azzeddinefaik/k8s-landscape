@@ -1,0 +1,117 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: exemple-mongodb
+  namespace: mongodb
+  labels:
+    app: exemple-mongodb
+spec:
+  serviceName: exemple-mongodb
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: exemple-mongodb
+      annotations:
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: db-pool
+      initContainers:
+        - name: install
+          image: "gcr.io/google_containers/mongodb-install:0.5"
+          args:
+            - --work-dir=/work-dir
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - name: workdir
+              mountPath: /work-dir
+            - name: config
+              mountPath: /config
+        - name: bootstrap
+          image: "mongo:4.0"
+          command:
+            - /work-dir/peer-finder
+          args:
+            - -on-start=/work-dir/on-start.sh
+            - "-service=exemple-mongodb"
+          imagePullPolicy: "IfNotPresent"
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: REPLICA_SET
+              value: usersMongoDb
+          volumeMounts:
+            - name: workdir
+              mountPath: /work-dir
+            - name: config
+              mountPath: /config
+            - name: datadir
+              mountPath: /data/db
+      containers:
+        - name: exemple-mongodb
+          image: "mongo:4.0"
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - name: peer
+              containerPort: 27017
+          resources:
+            requests:
+              cpu: 100m
+              memory: "1Gi"
+            limits:
+              memory: "3Gi"
+          command:
+            - mongod
+            - --config=/config/mongod.conf
+          livenessProbe:
+            exec:
+              command:
+                - mongo
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - mongo
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          volumeMounts:
+            - name: datadir
+              mountPath: /data/db
+            - name: config
+              mountPath: /config
+            - name: workdir
+              mountPath: /work-dir
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: exemple-mongodb 
+      volumes:
+        - name: config
+          configMap:
+            name: exemple-mongodb
+        - name: workdir
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+        annotations:
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        storageClassName: ssd
+        resources:
+          requests:
+            storage: "50Gi"

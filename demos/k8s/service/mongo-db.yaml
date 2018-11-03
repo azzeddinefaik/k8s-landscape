@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: exemple-mongodb-service
+  namespace: mongodb
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  labels:
+    app: exemple-mongodb
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: mongo
+      port: 27017
+  selector:
+    app: exemple-mongodb

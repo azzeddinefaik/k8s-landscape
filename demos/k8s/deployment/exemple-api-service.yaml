@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exemple-api-service
+  labels:
+    app: exemple-api-service
+    component: exemple-api-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: exemple-api-service
+      component: exemple-api-deployment
+  template:
+    metadata:
+      labels:
+        app: exemple-api-service
+        component: exemple-api-deployment
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: default-pool
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "failure-domain.beta.kubernetes.io/zone"
+                operator: In
+                values: ["europe-west1-b"] // will deploy in this zone
+      containers:
+      - name: exemple-api-service
+        image: gcr.io/prod/exemple-api-service:latest
+        env:
+        - name: MONGO_URI
+          value: "mongodb://exemple-mongodb-service-0.exemple-mongodb-service.mongodb:27017,exemple-mongodb-service-1.exemple-mongodb-service.mongodb:27017,exemple-mongodb-service-2.exemple-mongodb-service.mongodb:27017/?replicaSet=usersMongoDb"
+        - name: DEPLOYMENT_ENVIRONMENT
+          value: "prod"
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: exemple-api-secret
+              key: password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            memory: 100Mi
+        ports:
+        - containerPort: 7001
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 7001
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 7001
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
