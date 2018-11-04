@@ -1,0 +1,77 @@
+version: 2
+references:
+  spin_machine: &spin_machine
+    machine:
+      services:
+        - docker
+
+  checkout_submodules: &checkout_submodules
+    run:
+      name: Checkout submodules
+      command: |
+        git submodule sync
+        git submodule update --init --recursive --remote
+
+  setup_environment: &setup_environment
+    run:
+      name: Bootstrap environment
+      command: |
+        echo 'export APP_NAME=$CIRCLE_PROJECT_REPONAME' >> $BASH_ENV
+        ./ci-scripts/setup_environment.sh
+
+  build_image: &build_image
+    run:
+      name: Build image
+      command: ./ci-scripts/build.sh
+
+  run_tests: &run_tests
+    run:
+      name: Run tests
+      command: ./ci-scripts/test.sh
+
+  publish_images: &publish_images
+    run:
+      name: publish images
+      command: ./ci-scripts/publish.sh
+
+  deploy_code: &deploy_code
+    run:
+      name: deploy your code
+      command: ./ci-scripts/deploy.sh
+
+jobs:
+  build:
+    <<: *spin_machine
+    steps:
+      - checkout
+      - *checkout_submodules
+      - *setup_environment
+      - *build_image
+      - *run_lint
+      - *run_tests
+
+  deploy:
+    <<: *spin_machine
+    steps:
+      - checkout
+      - *checkout_submodules
+      - *setup_environment
+      - *build_image
+      - *publish_images
+      - *deploy_code
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          context: org-global
+      - deploy:
+          context: org-global
+          requires:
+            - build
+          filters:
+              branches:
+                only:
+                  - dev
+                  - master

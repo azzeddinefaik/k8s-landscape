@@ -1,0 +1,32 @@
+version: '3.3'
+
+services:
+   db:
+     image: mysql:8.0
+     volumes:
+       - db_data:/var/lib/mysql
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: tester
+       MYSQL_DATABASE: wordpress
+       MYSQL_USER: wordpress
+       MYSQL_PASSWORD: tester
+
+   wordpress:
+     depends_on:
+       - db
+     image: wordpress:latest
+     volumes:
+       - "./ydb_wp:/var/www/html"
+       - "./configs/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini"
+       - "./configs/.htaccess:/var/www/html/.htaccess"
+     ports:
+       - "80:80"
+     restart: always
+     environment:
+       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_USER: wordpress
+       WORDPRESS_DB_PASSWORD: tester
+
+volumes:
+    db_data:
