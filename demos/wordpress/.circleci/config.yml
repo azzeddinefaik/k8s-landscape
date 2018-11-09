@@ -16,18 +16,22 @@ references:
     run:
       name: Bootstrap environment
       command: |
-        echo 'export APP_NAME=$CIRCLE_PROJECT_REPONAME' >> $BASH_ENV
-        ./ci-scripts/setup_environment.sh
+       ./ci-scripts/setup-tools.sh
 
   build_image: &build_image
     run:
       name: Build image
-      command: ./ci-scripts/build.sh
+      command: ./ci-scripts/build-images.sh
 
   run_tests: &run_tests
     run:
       name: Run tests
-      command: ./ci-scripts/test.sh
+      command: ./ci-scripts/run-test.sh
+
+  run_lint: &run_lint
+    run:
+      name: Run lint
+      command: ./ci-scripts/run-lint.sh
 
   publish_images: &publish_images
     run:

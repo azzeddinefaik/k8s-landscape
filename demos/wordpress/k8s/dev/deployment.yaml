@@ -1,35 +1,30 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: consumer-api-service
+  name: wordpress-service
   labels:
-    app: consumer-api-service
-    team: order-payment
+    app: wordpress-service
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: consumer-api-service
+        app: wordpress-service
         team: order-payment
     spec:
       containers:
-      - name: consumer-api-service
-        image: gcr.io/fyndiq-dev/consumer-api-service:latest
+      - name: wordpress-service
+        image: wordpress:latest
         env:
-        - name: KAFKA_BROKERS
-          value: "kafka-0.broker.kafka:9092"
-        - name: SCHEMA_REGISTRY_URL
-          value: "http://schema-registry-lb:8081/"
-        - name: DATADOG_HOST
-          value: dd-agent-lb.default.svc.cluster.local
-        - name: SENTRY_DSN
+        - name: DB_HOST
+          value:
+        - name: DB_USERNAME
+          value:
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: consumer-api-service
-              key: sentry_dsn
-        - name: SENTRY_ENV
-          value: "dev"
+              name: wordpress-secret
+              key: password
         ports:
         - containerPort: 8000
         livenessProbe:
