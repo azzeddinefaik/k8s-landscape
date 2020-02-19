@@ -5,6 +5,9 @@ The purpose of this repos is to give you an idea about k8s and k8s aspects
 
 ![](./images/k8s.png)
 
+## Install minukube: 
+
+
 ## ☑ TODO
 
 - [ ] Networking in K8S
